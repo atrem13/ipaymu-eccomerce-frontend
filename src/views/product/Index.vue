@@ -13,6 +13,29 @@
             <div class="col-4">
                 <input type="text" class="form-control" placeholder="search product..." v-model="search" >
             </div>
+            <div class="col-4"></div>
+            <div class="col-2 text-end">
+                <select v-model="selected_date" class="form-control">
+                    <option value="">- Select Date -</option>
+                    <option value="Tanggal Ganjil">
+                        Tanggal Ganjil
+                    </option>
+                    <option value="Tanggal Genap">
+                        Tanggal Genap
+                    </option>
+                </select>
+            </div>
+            <div class="col-2 text-end">
+                <select v-model="selected_week" class="form-control">
+                    <option value="">- Select Week -</option>
+                    <option value="Minggu Ganjil">
+                        Minggu Ganjil
+                    </option>
+                    <option value="Minggu Genap">
+                        Minggu Genap
+                    </option>
+                </select>
+            </div>
         </div>
         <table class="table table-striped table-bordered mt-4" id="datatable1">
             <thead class="thead-dark">
@@ -28,12 +51,12 @@
             <tbody>
                 <tr v-for="(product, index) in searchedProducts" :key="product.id">
                     <td>{{ product.name }}</td>
-                    <td>{{ product.sell_price }}</td>
+                    <td>{{ formatRupiah(product.sell_price) }}</td>
                     <td>{{ dateTime(product.created_at) }}</td>
                     <td>{{ checkDate(product.created_at) }}</td>
                     <td>{{ checkWeek(product.created_at) }}</td>
                     <td>
-                        <router-link :to="{name: 'product.edit', params:{id: product.id }}" class="btn btn-sm btn-warning me-1">Edit</router-link>
+                        <router-link :to="{name: 'product.edit', params:{id: product.id }}" class="btn btn-sm btn-warning me-1 text-white">Edit</router-link>
                         <button @click.prevent="remove(product.id, index)" class="btn btn-sm btn-danger me-1">Delete</button>
                     </td>
                 </tr>
@@ -54,6 +77,8 @@ export default {
     setup() {
         let products = reactive([])
         let search = ref('')
+        let selected_week = ref('')
+        let selected_date = ref('')
 
         onMounted(() => {
             axios.get('http://localhost:8000/api/product')
@@ -93,15 +118,33 @@ export default {
             return count_date == 1 ? 'Tanggal Ganjil' : 'Tanggal Genap' 
         }
 
+        const formatRupiah = (value) => {
+            return "IDR " + value.toString().replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, "$1.")
+        }
+
 
         const searchedProducts  = computed(() => {
-            return products.filter((product) => {
-                return (
-                product.name
-                    .toLowerCase()
-                    .includes(search.value.toLowerCase())
-                );
-            });
+            if(selected_week.value != '' && selected_date.value != ''){
+                return products.filter((product) => {
+                    return product.name.toLowerCase().includes(search.value.toLowerCase()) && (selected_date.value == checkDate(product.created_at)) && (selected_week.value == checkWeek(product.created_at)) ;
+                });
+            }else if(selected_week.value != ''){
+                return products.filter((product) => {
+                    return product.name.toLowerCase().includes(search.value.toLowerCase()) && (selected_week.value == checkWeek(product.created_at)) ;
+                });
+            }else if(selected_date.value != ''){
+                return products.filter((product) => {
+                    return product.name.toLowerCase().includes(search.value.toLowerCase()) && (selected_date.value == checkDate(product.created_at)) ;
+                });
+            }else{
+                return products.filter((product) => {
+                    return (
+                    product.name
+                        .toLowerCase()
+                        .includes(search.value.toLowerCase())
+                    );
+                });
+            } 
         });
 
 
@@ -112,6 +155,9 @@ export default {
             dateTime,
             checkDate,
             checkWeek,
+            formatRupiah,
+            selected_week,
+            selected_date,
         }
 
     }
