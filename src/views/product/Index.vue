@@ -1,16 +1,20 @@
 <template>
     <div>
-        <idv class="row">
+        <div class="row">
             <div class="col-6">
                 <h4>Data product</h4>
             </div>
             <div class="col-6 text-end">
                 <router-link :to="{name: 'product.create'}" class="btn btn-sm btn-success">Add New Data</router-link>
             </div>
-        </idv>
+        </div>
         <hr>
-
-        <table class="table table-striped table-bordered mt-4">
+        <div class="row">
+            <div class="col-4">
+                <input type="text" class="form-control" placeholder="search product..." v-model="search" >
+            </div>
+        </div>
+        <table class="table table-striped table-bordered mt-4" id="datatable1">
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">Name</th>
@@ -19,17 +23,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="products.length == 0">
-                    <td colspan="3" class="text-center">
-                        Data Empty
-                    </td>
-                </tr>
-                <tr v-for="(product, index) in products" :key="index">
+                <tr v-for="(product, index) in searchedProducts" :key="product.id">
                     <td>{{ product.name }}</td>
                     <td>{{ product.sell_price }}</td>
                     <td>
                         <router-link :to="{name: 'product.edit', params:{id: product.id }}" class="btn btn-sm btn-warning me-1">Edit</router-link>
-                        <button @click.prevent="remove(product.id)" class="btn btn-sm btn-danger me-1">Delete</button>
+                        <button @click.prevent="remove(product.id, index)" class="btn btn-sm btn-danger me-1">Delete</button>
                     </td>
                 </tr>
             </tbody>
@@ -41,37 +40,50 @@
 
 <script>
 import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, reactive } from 'vue'
+
 
 export default {
-
     setup() {
-        let products = ref([])
+        let products = reactive([])
+        let search = ref('')
+
         onMounted(() => {
             axios.get('http://localhost:8000/api/product')
             .then(response => {
-              products.value = response.data.data
-            }).catch(error => {
-                console.log(error.response.data)
+                response.data.data.forEach((item) => {
+                    products.push(item);
+                });
             })
         })
 
-        function remove(id){
+        const remove = (id, index) => {
             axios.delete(`http://localhost:8000/api/product/${id}`)
             .then(() => {
-                products.value = products.value.filter(item => {
-                    return item.id !== id;
-                });
-                // products.value.splice(products.value.indexOf(index), 1);
+                // products.value = products.value.filter(item => {
+                //     return item.id !== id;
+                // });
+                products.splice(index, 1)
             }).catch(error => {
-                console.log(error.response.data)
+                console.log(error.response)
             })
 
         }
+        const searchedProducts  = computed(() => {
+            return products.filter((product) => {
+                return (
+                product.name
+                    .toLowerCase()
+                    .includes(search.value.toLowerCase())
+                );
+            });
+        });
+
 
         return {
-            products,
-            remove
+            searchedProducts ,
+            remove,
+            search,
         }
 
     }
