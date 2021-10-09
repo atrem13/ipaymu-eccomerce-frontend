@@ -30,6 +30,21 @@ const routes = [
         path: '/user/edit/:id',
         name: 'user.edit',
         component: () => import('@/views/user/Edit.vue')
+    },
+    {
+        path: '/transaction/',
+        name: 'transaction.index',
+        component: () => import('@/views/transaction/Index.vue')
+    },
+    {
+        path: '/transaction/create',
+        name: 'transaction.create',
+        component: () => import('@/views/transaction/Create.vue')
+    },
+    {
+        path: '/transaction/edit/:id',
+        name: 'transaction.edit',
+        component: () => import('@/views/transaction/Edit.vue')
     }
 ]
 

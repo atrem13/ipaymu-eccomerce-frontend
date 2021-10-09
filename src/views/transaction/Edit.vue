@@ -1,7 +1,7 @@
 <template>
     <h4>
-        <router-link :to="{name: 'user.index'}" class="btn btn-sm btn-secondary">Back</router-link>
-        Edit User</h4>
+        <router-link :to="{name: 'transaction.index'}" class="btn btn-sm btn-secondary">Back</router-link>
+        Edit Transaction</h4>
     <hr>
     <form @submit.prevent="update" enctype="multipart/form-data">
             <div class="form-group">
@@ -9,7 +9,7 @@
                 <input 
                     type="text" 
                     class="form-control mb-3" 
-                    v-model="user.name"
+                    v-model="transaction.name"
                 />
                 <div v-if="validation.name" class="mt-2 alert alert-danger">
                     {{ validation.name[0] }}
@@ -19,7 +19,7 @@
                 <label for="name" class="font-weight-bold">Email</label>
                 <input 
                     type="text" 
-                    class="form-control mb-3" v-model="user.email"
+                    class="form-control mb-3" v-model="transaction.email"
                 />
                 <div v-if="validation.email" class="mt-2 alert alert-danger">
                     {{ validation.name[0] }}
@@ -35,12 +35,12 @@
 
 <script>
 import { reactive, ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { transactionouter, transactionoute } from 'vue-router'
 import axios from 'axios'
 
 export default {
     setup() {
-        const user = reactive({
+        const transaction = reactive({
             id: '',
             name: '',
             email: ''
@@ -48,16 +48,16 @@ export default {
 
         const validation = ref([])
 
-        const router = useRouter()
+        const router = transactionouter()
 
-        const route = useRoute()
+        const route = transactionoute()
 
         onMounted(() => {
-            axios.get(`http://localhost:8000/api/user/${route.params.id}`)
+            axios.get(`http://localhost:8000/api/transaction/${route.params.id}`)
             .then(response => {
-              user.id = response.data.data.id  
-              user.name = response.data.data.name  
-              user.email = response.data.data.email  
+              transaction.id = response.data.data.id  
+              transaction.name = response.data.data.name  
+              transaction.email = response.data.data.email  
             }).catch(error => {
                 console.log(error.response.data)
             })
@@ -66,19 +66,19 @@ export default {
 
         function update() {
             let formData = new FormData()
-            formData.append('id', user.id)
-            formData.append('name', user.name)
-            formData.append('email', user.email)
+            formData.append('id', transaction.id)
+            formData.append('name', transaction.name)
+            formData.append('email', transaction.email)
             axios({
                 headers: { 
                     'Content-Type': 'multipart/form-data' 
                 },
                 method: 'POST',
-                url: `http://localhost:8000/api/user/update`,
+                url: `http://localhost:8000/api/transaction/update`,
                 data: formData
             }).then(() => {
                 router.push({
-                    name: 'user.index'
+                    name: 'transaction.index'
                 })
             }).catch(error => {
                 validation.value = error.response.data
@@ -86,7 +86,7 @@ export default {
         }
 
         return {
-            user,
+            transaction,
             validation,
             router,
             route,
