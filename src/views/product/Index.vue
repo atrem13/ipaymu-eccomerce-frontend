@@ -19,6 +19,9 @@
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Sell Price</th>
+                    <th scope="col">Create Date</th>
+                    <th scope="col">Keterangan Tanggal</th>
+                    <th scope="col">Keterangan Minggu</th>
                     <th scope="col">Action</th>
                 </tr>
             </thead>
@@ -26,6 +29,9 @@
                 <tr v-for="(product, index) in searchedProducts" :key="product.id">
                     <td>{{ product.name }}</td>
                     <td>{{ product.sell_price }}</td>
+                    <td>{{ dateTime(product.created_at) }}</td>
+                    <td>{{ checkDate(product.created_at) }}</td>
+                    <td>{{ checkWeek(product.created_at) }}</td>
                     <td>
                         <router-link :to="{name: 'product.edit', params:{id: product.id }}" class="btn btn-sm btn-warning me-1">Edit</router-link>
                         <button @click.prevent="remove(product.id, index)" class="btn btn-sm btn-danger me-1">Delete</button>
@@ -39,6 +45,7 @@
 </template>
 
 <script>
+import moment from 'moment';
 import axios from 'axios'
 import { computed, onMounted, ref, reactive } from 'vue'
 
@@ -69,6 +76,24 @@ export default {
             })
 
         }
+
+        const dateTime = (value) => {
+            return moment(value).format('DD/MM/YYYY')
+        }
+        
+        const checkWeek = (value) => {
+            let week = moment(value).format('DD')
+            let count_week = parseInt(week) / 7 % 2 
+            return count_week == 0 || count_week > 1 ? 'Minggu Genap' : 'Minggu Ganjil'
+        }
+
+        const checkDate = (value) => {
+            let date = moment(value).format('DD')
+            let count_date = parseInt(date) % 2
+            return count_date == 1 ? 'Tanggal Ganjil' : 'Tanggal Genap' 
+        }
+
+
         const searchedProducts  = computed(() => {
             return products.filter((product) => {
                 return (
@@ -82,8 +107,11 @@ export default {
 
         return {
             searchedProducts ,
-            remove,
             search,
+            remove,
+            dateTime,
+            checkDate,
+            checkWeek,
         }
 
     }
